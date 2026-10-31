@@ -6,7 +6,7 @@
     //   Example: 'https://watchlist-search.yourname.workers.dev'
     var TMDB_PROXY = '';
     // Option B (simplest): your own TMDB key. Anyone who views the page source can see it.
-    var TMDB_BUILTIN_KEY = '';
+    var TMDB_BUILTIN_KEY = '2f36b3c0269f68cee6ad360135a2bdd7';
     // If both are empty, each person can paste their own free TMDB key in Settings instead.
 
     var KEY = 'watchlist-manager.v1';
