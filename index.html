@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>Watchlist Manager</title>
+    <meta name="theme-color" content="#5c123e">
+    <meta name="description" content="Keep track of the movies, shows and dramas you watch. Your list stays on your device.">
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" href="icons/icon-192.png">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Watchlist">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="topbar">
+        <div class="bar-inner">
+            <h1 class="brand">WATCHLIST MANAGER</h1>
+            <button class="btn ghost small" id="backupBtn" type="button">Settings</button>
+        </div>
+    </header>
+
+    <main class="content">
+        <section class="page-head">
+            <div>
+                <h2 id="pageTitle"></h2>
+                <p id="pageCount"></p>
+            </div>
+            <button class="btn" id="addBtn" type="button">Add new</button>
+        </section>
+
+        <div class="tools">
+            <input id="search" type="search" placeholder="Search titles" aria-label="Search titles" autocomplete="off">
+            <div class="filters" id="filters" aria-label="Filter by category"></div>
+        </div>
+
+        <div class="grid" id="grid"></div>
+
+        <div class="empty" id="empty" hidden>
+            <p id="emptyText"></p>
+            <button class="btn" id="emptyAdd" type="button">Add new</button>
+        </div>
+    </main>
+
+    <nav class="tabbar" id="tabbar" aria-label="Lists">
+        <button type="button" data-view="home">Home</button>
+        <button type="button" data-view="completed">Completed</button>
+        <button type="button" data-view="watch-later">Watch later</button>
+        <button type="button" data-view="watching">Watching</button>
+    </nav>
+
+    <!-- add / edit -->
+    <dialog id="formDlg" aria-labelledby="formTitle">
+        <form id="itemForm">
+            <h2 id="formTitle">Add a title</h2>
+
+            <div class="lookup">
+                <label for="fSearch">Find by name (auto-fill)</label>
+                <input id="fSearch" type="search" placeholder="Type a movie or show name" autocomplete="off" disabled>
+                <p class="small-note" id="lookupMsg"></p>
+                <button class="btn ghost small" id="setupKey" type="button" hidden>Set up auto-fill</button>
+                <ul class="results" id="results"></ul>
+            </div>
+
+            <label for="fTitle">Title</label>
+            <input id="fTitle" type="text" required maxlength="200" autocomplete="off">
+
+            <div class="two-col">
+                <div>
+                    <label for="fCategory">Category</label>
+                    <select id="fCategory">
+                        <option>Movie</option><option>Series</option><option>Drama</option>
+                        <option>Anime</option><option>Other</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="fStatus">Status</label>
+                    <select id="fStatus">
+                        <option>Completed</option><option>Watching</option><option>Plan to watch</option>
+                    </select>
+                </div>
+            </div>
+
+            <label for="fRating">Rating (1 to 10, optional)</label>
+            <input id="fRating" type="number" min="1" max="10" inputmode="numeric">
+
+            <div class="preview" id="preview" hidden>
+                <img id="previewImg" class="poster" alt="Picture preview">
+                <button class="btn ghost small" id="removeImg" type="button">Remove picture</button>
+            </div>
+
+            <label for="fFile">Picture (choose a photo)</label>
+            <input id="fFile" type="file" accept="image/*">
+
+            <label for="fUrl">or paste a picture link</label>
+            <input id="fUrl" type="url" placeholder="https://..." autocomplete="off">
+
+            <label for="fNotes">Notes</label>
+            <textarea id="fNotes" rows="3" maxlength="2000"></textarea>
+
+            <div class="form-actions">
+                <button class="btn" type="submit">Save</button>
+                <button class="btn ghost" id="cancelBtn" type="button">Cancel</button>
+            </div>
+        </form>
+    </dialog>
+
+    <!-- settings -->
+    <dialog id="backupDlg" aria-labelledby="backupTitle">
+        <div class="panel-body">
+            <h2 id="backupTitle">Settings</h2>
+
+            <div id="keySection">
+            <h3>Auto-fill by name (optional)</h3>
+            <p>Type a title and the app fills in the poster, type and plot from TMDB.
+               It needs your own free key: create an account at
+               <a href="https://www.themoviedb.org/" target="_blank" rel="noopener">themoviedb.org</a>,
+               open <strong>Settings, then API</strong>, request a key, and paste it here.
+               The key stays on this phone only.</p>
+            <label for="fKey">TMDB API key or read access token</label>
+            <input id="fKey" type="password" autocomplete="off" spellcheck="false">
+            <div class="form-actions wrap">
+                <button class="btn" id="saveKey" type="button">Save key</button>
+                <button class="btn ghost" id="removeKey" type="button">Remove key</button>
+            </div>
+            <p class="small-note" id="keyMsg"></p>
+            </div>
+
+            <h3>Backup</h3>
+            <p>Your list is saved only in this browser, on this device. Clearing your browser data erases it,
+               so save a backup file now and then. Your TMDB key is not included in backups.</p>
+            <div class="form-actions wrap">
+                <button class="btn" id="exportBtn" type="button">Save backup file</button>
+                <label class="btn ghost file-btn" for="importFile">Restore from file</label>
+                <input id="importFile" type="file" accept="application/json,.json" hidden>
+            </div>
+            <p class="small-note" id="storageNote"></p>
+            <div class="form-actions wrap">
+                <button class="btn danger" id="eraseBtn" type="button">Erase my list</button>
+            </div>
+
+            <h3>About</h3>
+            <p class="small-note">Movie and show details come from TMDB.
+               This product uses the TMDB API but is not endorsed or certified by TMDB.
+               <img class="tmdb-logo" src="icons/tmdb.svg" alt="TMDB logo" onerror="this.remove()"></p>
+
+            <div class="form-actions">
+                <button class="btn ghost" id="closeBackup" type="button">Close</button>
+            </div>
+        </div>
+    </dialog>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="app.js"></script>
+</body>
+</html>
